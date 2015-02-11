@@ -52,6 +52,9 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :hostattributes => node["hostattributes"],
           :enable_snmp   => node["enable_snmp"],
           :snmp_community   => node["snmp_community"],
+          :encrypted_snmp_community   => node["encrypted_snmp_community"],
+          :encrypted_snmpv3_authpassword   => node["encrypted_snmpv3_authpassword"],
+          :encrypted_snmpv3_privpassword   => node["encrypted_snmpv3_privpassword"],
           :snmp_version   => node["snmp_version"],
           :snmp_port   => node["snmp_port"],
           :snmpv3_authpassword => node["snmpv3_authpassword"],
@@ -158,22 +161,38 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     @updated_json["ip"] = @property_hash[:ip]
 
     @updated_json["enable_snmp"] = @property_hash[:enable_snmp]
-    @updated_json["snmp_community"] = @property_hash[:snmp_community]
+
+#    Disabled for version 4.6.1
+#    @updated_json["snmp_community"] = @property_hash[:snmp_community]
+#    if not @property_hash[:snmpv3_authpassword].to_s.empty?
+#      @updated_json["snmpv3_authpassword"] = @property_hash[:snmpv3_authpassword]
+#    end
+#    if not  @property_hash[:snmpv3_privpassword].to_s.empty?
+#      @updated_json["snmpv3_privpassword"] = @property_hash[:snmpv3_privpassword]
+#    end
+#    /Disabled for version 4.6.1
+
+    if not @property_hash[:encrypted_snmp_community].to_s.empty?
+      @updated_json["encrypted_snmp_community"] = @property_hash[:encrypted_snmp_community]
+    end
+
+    if not @property_hash[:encrypted_snmpv3_authpassword].to_s.empty?
+      @updated_json["encrypted_snmpv3_authpassword"] = @property_hash[:encrypted_snmpv3_authpassword]
+    end
+
+    if not @property_hash[:encrypted_snmpv3_privpassword].to_s.empty?
+      @updated_json["encrypted_snmpv3_privpassword"] = @property_hash[:encrypted_snmpv3_privpassword]
+    end
+
     @updated_json["snmp_version"] = @property_hash[:snmp_version]
     @updated_json["snmp_port"] = @property_hash[:snmp_port]
     @updated_json["notification_interval"] = @property_hash[:notification_interval]
 
-    if not @property_hash[:snmpv3_authpassword].to_s.empty?
-      @updated_json["snmpv3_authpassword"] = @property_hash[:snmpv3_authpassword]
-    end
 
     if not  @property_hash[:snmpv3_authprotocol].to_s.empty?
       @updated_json["snmpv3_authprotocol"] = @property_hash[:snmpv3_authprotocol]
     end
 
-    if not  @property_hash[:snmpv3_privpassword].to_s.empty?
-      @updated_json["snmpv3_privpassword"] = @property_hash[:snmpv3_privpassword]
-    end
 
     if not  @property_hash[:snmpv3_privprotocol].to_s.empty?
       @updated_json["snmpv3_privprotocol"] = @property_hash[:snmpv3_privprotocol]
@@ -349,7 +368,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "notification_options" : "u,d,r",
        "name" : "puppet-unknown",
        "rancid_vendor" : null,
-       "snmp_community" : "public",
        "hostgroup" : {
           "name" : "From Puppet - Unknown"
        },
@@ -373,12 +391,10 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "snmp_max_msg_size" : "default",
        "snmp_extended_throughput_data" : "0",
        "tidy_ifdescr_level" : "off",
-       "snmpv3_authpassword" : "",
        "use_nmis" : "0",
        "rancid_connection_type" : "ssh",
        "snmpv3_authprotocol" : null,
        "rancid_username" : null,
-       "rancid_password" : null,
        "check_command" : {
           "name" : "ping"
        },
@@ -387,7 +403,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "notification_interval" : "60",
        "snmp_port" : "161",
        "snmpv3_username" : "",
-       "snmpv3_privpassword" : "",
        "other_addresses" : ""
      }'
 

@@ -81,9 +81,18 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto "0" 
   end
 
+  newproperty(:encrypted_snmp_community) do
+    desc "Encrypted SNMP community string for SNMP protocol 1 and 2c"
+    def insync?(is)
+      is == should 
+    end
+  end
+
   newproperty(:snmp_community) do
     desc "SNMP community string for SNMP protocol 1 and 2c"
-    defaultto "public" 
+    def insync?(is)
+      true
+    end
   end
 
   newproperty(:snmp_version) do
@@ -104,6 +113,17 @@ Puppet::Type.newtype(:opsview_monitored) do
   newproperty(:snmpv3_authpassword) do
     desc "SNMP v3 Auth Password (should be 8 chars)"
     defaultto ""
+    def insync?(is)
+      true
+    end
+  end
+
+  newproperty(:encrypted_snmpv3_authpassword) do
+    desc "Encrypted SNMP v3 Auth Password"
+    defaultto ""
+    def insync?(is)
+      is == should
+    end
   end
 
   newproperty(:snmpv3_authprotocol) do
@@ -115,9 +135,20 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto :md5
   end
 
+  newproperty(:encrypted_snmpv3_privpassword) do
+    desc "Encrypted SNMP v3 Priv Password"
+    defaultto ""
+    def insync?(is)
+      is == should
+    end
+  end
+
   newproperty(:snmpv3_privpassword) do
     desc "SNMP v3 Priv Password (should be 8 chars)"
     defaultto ""
+    def insync?(is)
+      true
+    end
   end
 
   newproperty(:snmpv3_privprotocol) do
