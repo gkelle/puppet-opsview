@@ -28,6 +28,8 @@ Puppet Types in this Module
 ===========================
 
 * opsview_attribute
+* opsview_bsmcomponent
+* opsview_bsmservice
 * opsview_contact
 * opsview_hostgroup
 * opsview_hosttemplate
@@ -57,3 +59,4 @@ Contributors
 * Duncan Ferguson &lt;duncs&gt;
 * Amos Shapira &lt;amosshapira&gt;
 * John Kinsella &lt;jlk&gt;
+* Kellen G &lt;gkelle&gt;
