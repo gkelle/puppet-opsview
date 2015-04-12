@@ -61,6 +61,54 @@ Puppet::Type.type(:opsview_attribute).provide :opsview, :parent => Puppet::Provi
       p[:arg4] = attribute["arg4"]
     end
 
+    if defined? attribute["encrypted_arg1"]
+      p[:encrypted_arg1] = attribute["encrypted_arg1"]
+    end
+
+    if defined? attribute["encrypted_arg2"]
+      p[:encrypted_arg2] = attribute["encrypted_arg2"]
+    end
+
+    if defined? attribute["encrypted_arg3"]
+      p[:encrypted_arg3] = attribute["encrypted_arg3"]
+    end
+
+    if defined? attribute["encrypted_arg4"]
+      p[:encrypted_arg4] = attribute["encrypted_arg4"]
+    end
+
+    if defined? attribute["label1"]
+      p[:label1] = attribute["label1"]
+    end
+
+    if defined? attribute["label2"]
+      p[:label2] = attribute["label2"]
+    end
+
+    if defined? attribute["label3"]
+      p[:label3] = attribute["label3"]
+    end
+
+    if defined? attribute["label4"]
+      p[:label4] = attribute["label4"]
+    end
+
+    if defined? attribute["secured1"]
+      p[:secured1] = attribute["secured1"]
+    end
+
+    if defined? attribute["secured2"]
+      p[:secured2] = attribute["secured2"]
+    end
+
+    if defined? attribute["secured3"]
+      p[:secured3] = attribute["secured3"]
+    end
+
+    if defined? attribute["secured4"]
+      p[:secured4] = attribute["secured4"]
+    end
+
     p
   end
 
@@ -97,21 +145,64 @@ Puppet::Type.type(:opsview_attribute).provide :opsview, :parent => Puppet::Provi
     # Update the attribute's JSON values based on any new params.  Sadly due to the
     # structure of the JSON vs the flat nature of the puppet properties, this
     # is a bit of a manual task.
+    if not @property_hash[:encrypted_arg1].to_s.empty?
+      @updated_json["encrypted_arg1"] = @property_hash[:encrypted_arg1]
+      @updated_json["secured1"] = "1"
+    elsif not @property_hash[:value].to_s.empty?
+      @updated_json["arg1"] = @property_hash[:arg1]
+    end
+
+    if not @property_hash[:encrypted_arg2].to_s.empty?
+      @updated_json["encrypted_arg2"] = @property_hash[:encrypted_arg2]
+      @updated_json["secured2"] = "1"
+    elsif not @property_hash[:value].to_s.empty?
+      @updated_json["arg2"] = @property_hash[:arg2]
+    end
+
+    if not @property_hash[:encrypted_arg3].to_s.empty?
+      @updated_json["encrypted_arg3"] = @property_hash[:encrypted_arg3]
+      @updated_json["secured3"] = "1"
+    elsif not @property_hash[:value].to_s.empty?
+      @updated_json["arg3"] = @property_hash[:arg3]
+    end
+
+    if not @property_hash[:encrypted_arg4].to_s.empty?
+      @updated_json["encrypted_arg4"] = @property_hash[:encrypted_arg4]
+      @updated_json["secured4"] = "1"
+    elsif not @property_hash[:value].to_s.empty?
+      @updated_json["arg4"] = @property_hash[:arg4]
+    end
+
     if not @property_hash[:value].to_s.empty?
       @updated_json["value"] = @property_hash[:value]
     end
-    if not @property_hash[:arg1].to_s.empty?
-      @updated_json["arg1"] = @property_hash[:arg1]
+
+    if not @property_hash[:label1].to_s.empty?
+      @updated_json["label1"] = @property_hash[:label1]
     end
-    if not @property_hash[:arg2].to_s.empty?
-      @updated_json["arg2"] = @property_hash[:arg2]
+    if not @property_hash[:label2].to_s.empty?
+      @updated_json["label2"] = @property_hash[:label2]
     end
-    if not @property_hash[:arg3].to_s.empty?
-      @updated_json["arg3"] = @property_hash[:arg3]
+    if not @property_hash[:label3].to_s.empty?
+      @updated_json["label3"] = @property_hash[:label3]
     end
-    if not @property_hash[:arg4].to_s.empty?
-      @updated_json["arg4"] = @property_hash[:arg4]
+    if not @property_hash[:label4].to_s.empty?
+      @updated_json["label4"] = @property_hash[:label4]
     end
+
+    if not @property_hash[:secured1].to_s.empty?
+      @updated_json["secured1"] = @property_hash[:secured1]
+    end
+    if not @property_hash[:secured2].to_s.empty?
+      @updated_json["secured2"] = @property_hash[:secured2]
+    end
+    if not @property_hash[:secured3].to_s.empty?
+      @updated_json["secured3"] = @property_hash[:secured3]
+    end
+    if not @property_hash[:secured4].to_s.empty?
+      @updated_json["secured4"] = @property_hash[:secured4]
+    end
+
     @updated_json["name"] = @resource[:attribute]
   
     # Flush changes:
@@ -187,7 +278,7 @@ Puppet::Type.type(:opsview_attribute).provide :opsview, :parent => Puppet::Provi
     json = '
      {
        "value" :  "",
-       "name" : "puppet-unknown",
+       "name" : "PUPPETUNKNOWN",
        "arg1" :  "",
        "arg2" :  "",
        "arg3" :  "",
