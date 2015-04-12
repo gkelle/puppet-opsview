@@ -24,7 +24,7 @@ Puppet::Type.newtype(:opsview_bsmservice) do
   end
 
   autorequire(:opsview_bsmcomponent) do
-    [self[:components]]
+    self[:components]
   end
 
 end

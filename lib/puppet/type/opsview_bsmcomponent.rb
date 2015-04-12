@@ -42,7 +42,7 @@ Puppet::Type.newtype(:opsview_bsmcomponent) do
   end
 
   autorequire(:opsview_monitored) do
-    [self[:hosts]]
+    self[:hosts]
   end
 
 end
