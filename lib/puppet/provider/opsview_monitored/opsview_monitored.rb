@@ -77,7 +77,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
       p[:keywords] = node["keywords"].collect{ |kw| kw["name"] }
     end
     if defined? node["hostattributes"]
-      p[:hostattributes] = node["hostattributes"].collect{ |ha| {"name" => ha["name"], "value" => ha["value"]} }
+      p[:hostattributes] = node["hostattributes"].collect{ |ha| {"name" => ha["name"], "value" => ha["value"], "arg1" => ha["arg1"], "arg2" => ha["arg2"], "arg3" => ha["arg3"], "arg4" => ha["arg4"], "encrypted_arg1" => ha["encrypted_arg1"], "encrypted_arg2" => ha["encrypted_arg2"], "encrypted_arg3" => ha["encrypted_arg3"], "encrypted_arg4" => ha["encrypted_arg4"] }.delete_if{ |k, v| v.nil?}  }
     end
     if defined? node["monitored_by"]["name"]
       p[:monitored_by] = node["monitored_by"]["name"]
@@ -261,7 +261,12 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     @updated_json["hostattributes"] = []
     if @property_hash[:hostattributes]
       @property_hash[:hostattributes].each do |ha_hash|
-        @updated_json["hostattributes"] << {:name => ha_hash["name"], :value => ha_hash["value"]}
+        @updated_json["hostattributes"] << {:name => ha_hash["name"], :value => ha_hash["value"],
+						:arg1 => ha_hash["arg1"], :arg2 => ha_hash["arg2"],
+						:arg3 => ha_hash["arg3"], :arg4 => ha_hash["arg4"],
+						:encrypted_arg1 => ha_hash["encrypted_arg1"], :encrypted_arg2 => ha_hash["encrypted_arg2"],
+						:encrypted_arg3 => ha_hash["encrypted_arg3"], :encrypted_arg4 => ha_hash["encrypted_arg4"]
+	}
       end
     end
     

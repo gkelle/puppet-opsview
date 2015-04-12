@@ -212,7 +212,15 @@ Puppet::Type.newtype(:opsview_monitored) do
 
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is_temp=Array.new
+	should_temp=Array.new
+	is.each do |ha|
+	  (is_temp << ha.sort_by{ |k,v| k})
+	end
+	@should.each do |ha|
+	  (should_temp << ha.sort_by{ |k,v| k})
+	end
+	is_temp.sort == should_temp.sort
       else
         is == @should
       end
