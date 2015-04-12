@@ -144,7 +144,51 @@ class Puppet::Provider::Opsview < Puppet::Provider
     self.class.do_reload_opsview
   end
 
+  def self.get_api_status(method)
+    url = [ config["url"], method ].join("/")
+
+    Puppet.debug "Getting Opsview API status"
+
+    response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+
+    case response.code
+    when 200
+        # all is ok at this pount
+    when 401
+        @@errorOccurred = 1
+        raise "Login failed: " + response.code
+    else
+        @@errorOccurred = 1
+        raise "Was not able to fetch Opsview status: HTTP code: " + response.code
+    end
+	
+    Puppet.debug "Current API info: " + response.inspect
+    return JSON.parse(response)
+  end
   def self.do_reload_opsview
+    last_reload = self.get_api_status("reload")
+
+    if last_reload["configuration_status"] == "uptodate"
+	Puppet.info "Opsview is already up-to-date; exiting"
+	return
+    end
+
+    if last_reload["server_status"].to_i > 0
+        case last_reload["server_status"].to_i
+	when 1
+	    Puppet.info "Opsview reload already in progress; continuing"
+	    return
+	when 2
+	    Puppet.warning "Opsview server is not running"
+	    return
+	when 3
+	    Puppet.error "Opsview Server: Configuration error or critical error"
+	    return
+	when 4
+	    Puppet.warning "Warnings exist in configuration:" + last_reload["messages"].inspect
+	end
+    end
+
     url = [ config["url"], "reload" ].join("/")
 
     if @@errorOccurred > 0
@@ -155,7 +199,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     Puppet.notice "Performing Opsview reload"
 
     begin
-      response = RestClient.post url, '', :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+      response = RestClient.post url, '', :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:asynchronous => 1}
     rescue
       @@errorOccurred = 1
       Puppet.warning "Unable to reload Opsview: " + $!.inspect
