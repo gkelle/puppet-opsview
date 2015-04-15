@@ -42,7 +42,7 @@ Puppet::Type.type(:opsview_bsmcomponent).provide :opsview, :parent => Puppet::Pr
     p = { :name      => bsmcomponent["name"],
           :hosttemplate => bsmcomponent["host_template"]["name"],
           :has_icon => bsmcomponent["has_icon"],
-	  :quorum_percentage => bsmcomponent["quorum_pct"],
+	  :required_online => (bsmcomponent["hosts"].count * ( bsmcomponent["quorum_pct"].to_f/100.0) ).round(0).to_s,
           :hosts => bsmcomponent["hosts"].collect{ |h| h["name"] },
           :full_json => bsmcomponent,
           :ensure    => :present }
@@ -87,8 +87,16 @@ Puppet::Type.type(:opsview_bsmcomponent).provide :opsview, :parent => Puppet::Pr
     if @property_hash[:hosts]
 	@updated_json["hosts"] = @property_hash[:hosts].collect{ |h| { :name => h } }
     end
+
+    if not @property_hash[:required_online].to_s.empty?
+      calculated_pct = ('%.2f' % (   (@property_hash[:required_online].to_f/@property_hash[:hosts].count.to_f)*100.0)   ).to_f
+      if (calculated_pct % 1 == 0.00)
+              calculated_pct=calculated_pct.truncate
+      end
+      @updated_json["quorum_pct"] = calculated_pct
+    end
+
     @updated_json["name"] = @resource[:name]
-    @updated_json["quorum_pct"] = @property_hash[:quorum_percentage]
   
     # Flush changes:
     put @updated_json.to_json

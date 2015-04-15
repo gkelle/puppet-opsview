@@ -11,9 +11,9 @@ Puppet::Type.newtype(:opsview_bsmcomponent) do
     defaultto :false
   end
   
-  newproperty(:quorum_percentage) do
-    desc "The percentage of hosts that are required online"
-    defaultto 100
+  newproperty(:required_online) do
+    desc "The number of hosts that are required online"
+    defaultto 0
   end
 
   newproperty(:has_icon) do
