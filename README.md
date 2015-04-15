@@ -35,6 +35,7 @@ Puppet Types in this Module
 * opsview_hosttemplate
 * opsview_keyword
 * opsview_monitored
+* opsview_monitoringserver
 * opsview_notificationmethod
 * opsview_role
 * opsview_servicecheck
