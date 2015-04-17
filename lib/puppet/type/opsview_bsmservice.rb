@@ -11,6 +11,11 @@ Puppet::Type.newtype(:opsview_bsmservice) do
     defaultto :false
   end
 
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+
   newproperty(:components, :array_matching => :all) do
     desc "Array of Opsview BSM components that should be applied to this BSM service"
     defaultto []

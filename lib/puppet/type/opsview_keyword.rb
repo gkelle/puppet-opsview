@@ -10,6 +10,12 @@ Puppet::Type.newtype(:opsview_keyword) do
       keyword is updated."
     defaultto :false
   end
+
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+
   newproperty(:keyword) do
     desc "The name of this keyword."
     defaultto { @resource[:name] }

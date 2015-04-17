@@ -10,7 +10,12 @@ Puppet::Type.newtype(:opsview_attribute) do
     desc "True if you want an Opsview reload to be performed when the attribute is updated"
     defaultto :false
   end
-  
+
+   newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+ 
   newproperty(:attribute) do
     desc "The name of the attribute to manage"
     defaultto { @resource[:name] }

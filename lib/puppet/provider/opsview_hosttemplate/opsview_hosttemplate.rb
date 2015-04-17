@@ -43,6 +43,13 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.hosttemplate_map(hosttemplate)
     p = { :name           => hosttemplate["name"],
           :hosttemplate   => hosttemplate["name"],

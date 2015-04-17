@@ -38,6 +38,13 @@ Puppet::Type.type(:opsview_attribute).provide :opsview, :parent => Puppet::Provi
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.attribute_map(attribute)
     p = { :name      => attribute["name"],
           :attribute => attribute["name"],

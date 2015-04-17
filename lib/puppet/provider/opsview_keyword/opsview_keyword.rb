@@ -43,6 +43,13 @@ Puppet::Type.type(:opsview_keyword).provide :opsview, :parent => Puppet::Provide
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.keyword_map(keyword)
     p = { :name      => keyword["name"],
           :keyword   => keyword["name"],

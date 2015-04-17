@@ -38,6 +38,13 @@ Puppet::Type.type(:opsview_bsmservice).provide :opsview, :parent => Puppet::Prov
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.bsmservice_map(bsmservice)
     p = { :name      => bsmservice["name"],
           :components => bsmservice["components"].collect{ |c| c["name"] },

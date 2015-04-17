@@ -42,6 +42,13 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.node_map(node)
     p = { :name          => node["name"],
           :ip            => node["ip"],

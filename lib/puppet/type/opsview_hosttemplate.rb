@@ -10,7 +10,12 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
     desc "True if you want an Opsview reload to be performed when the hosttemplate is updated"
     defaultto :false
   end
-  
+
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+ 
   newproperty(:hosttemplate) do
     desc "This hosttemplate"
   end

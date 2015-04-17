@@ -43,6 +43,13 @@ Puppet::Type.type(:opsview_hostgroup).provide :opsview, :parent => Puppet::Provi
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.hostgroup_map(hostgroup)
     p = { :name      => hostgroup["name"],
           :hostgroup => hostgroup["name"],

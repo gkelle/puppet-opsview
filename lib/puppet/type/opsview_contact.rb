@@ -10,6 +10,12 @@ Puppet::Type.newtype(:opsview_contact) do
       contact is updated"
     defaultto :false
   end
+
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+
   newproperty(:fullname) do
     desc "Full name of the user"
   end

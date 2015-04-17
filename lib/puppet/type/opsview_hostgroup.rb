@@ -10,7 +10,12 @@ Puppet::Type.newtype(:opsview_hostgroup) do
     desc "True if you want an Opsview reload to be performed when the hostgroup is updated"
     defaultto :false
   end
-  
+
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+ 
   newproperty(:hostgroup) do
     desc "The name of the hostgroup to manage"
     defaultto { @resource[:name] }

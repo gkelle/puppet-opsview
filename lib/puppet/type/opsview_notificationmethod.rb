@@ -11,7 +11,12 @@ Puppet::Type.newtype(:opsview_notificationmethod) do
           notificationmethod is updated"
     defaultto :false
   end
-  
+
+   newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+ 
   newproperty(:master) do
     desc "Whether or not this is enabled on the master"
   end

@@ -38,6 +38,13 @@ Puppet::Type.type(:opsview_monitoringserver).provide :opsview, :parent => Puppet
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.monitoringserver_map(monitoringserver)
     p = { :name      => monitoringserver["name"],
           :activated => monitoringserver["activated"],

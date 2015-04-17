@@ -43,6 +43,13 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.role_map(role)
     p = { :name      => role["name"],
           :role      => role["name"],

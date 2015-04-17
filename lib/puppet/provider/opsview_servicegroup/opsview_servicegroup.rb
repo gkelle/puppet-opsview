@@ -43,6 +43,13 @@ Puppet::Type.type(:opsview_servicegroup).provide :opsview, :parent => Puppet::Pr
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.servicegroup_map(servicegroup)
     p = { :name         => servicegroup["name"],
           :servicegroup => servicegroup["name"],

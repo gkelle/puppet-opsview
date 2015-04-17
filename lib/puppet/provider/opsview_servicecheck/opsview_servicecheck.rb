@@ -43,6 +43,13 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.servicecheck_map(servicecheck)
     p = { :name         => servicecheck["name"],
           :description  => servicecheck["description"],

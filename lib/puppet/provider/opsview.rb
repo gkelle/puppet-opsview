@@ -8,6 +8,14 @@ require 'yaml'
 
 class Puppet::Provider::Opsview < Puppet::Provider
   @@errorOccurred = 0
+  @@opsview_classvars = {
+  	:calculated_total => 0,
+	:total => 0,
+	:seen => 0,
+	:forked => false,
+	:reload_opsview => false,
+	:sleeptime => 10
+  }
 
   def create
     @property_hash[:ensure] = :present
@@ -36,6 +44,41 @@ class Puppet::Provider::Opsview < Puppet::Provider
   end
 
   private
+
+  def internal
+  	  if @@opsview_classvars[:calculated_total] == 0 && defined? resource.catalog.resources
+		  [
+		   Puppet::Type.type(:opsview_monitored),
+		   Puppet::Type.type(:opsview_bsmservice),
+		   Puppet::Type.type(:opsview_bsmcomponent),
+		   Puppet::Type.type(:opsview_attribute),
+		   Puppet::Type.type(:opsview_contact),
+		   Puppet::Type.type(:opsview_hostgroup),
+		   Puppet::Type.type(:opsview_hosttemplate),
+		   Puppet::Type.type(:opsview_keyword),
+		   Puppet::Type.type(:opsview_monitoringserver),
+		   Puppet::Type.type(:opsview_notificationmethod),
+		   Puppet::Type.type(:opsview_role),
+		   Puppet::Type.type(:opsview_servicecheck),
+		   Puppet::Type.type(:opsview_servicegroup),
+		  ].each do |type|
+			@@opsview_classvars[:total] += resource.catalog.resources.find_all{ |x| x.is_a?(type) }.count
+		  end
+		  @@opsview_classvars[:calculated_total] = 1
+  	end
+
+	@@opsview_classvars[:seen] += 1
+
+	if (@@opsview_classvars[:seen] == @@opsview_classvars[:total]) && @@opsview_classvars[:reload_opsview] == true
+		Puppet.info "Forking a process to reload Opsview in #{@@opsview_classvars[:sleeptime]} seconds"
+		@@opsview_classvars[:forked] = 1
+		fork do
+			sleep(@@opsview_classvars[:sleeptime])
+			self.class.do_actual_reload_opsview
+			exit
+		end
+	end
+  end
 
   def put(body)
     self.class.put(body)
@@ -165,7 +208,8 @@ class Puppet::Provider::Opsview < Puppet::Provider
     Puppet.debug "Current API info: " + response.inspect
     return JSON.parse(response)
   end
-  def self.do_reload_opsview
+
+  def self.do_actual_reload_opsview
     last_reload = self.get_api_status("reload")
 
     if last_reload["configuration_status"] == "uptodate"
@@ -176,7 +220,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
     if last_reload["server_status"].to_i > 0
         case last_reload["server_status"].to_i
 	when 1
-	    Puppet.info "Opsview reload already in progress; continuing"
+	    Puppet.info "Opsview reload already in progress; skipping"
 	    return
 	when 2
 	    Puppet.warning "Opsview server is not running"
@@ -215,6 +259,14 @@ class Puppet::Provider::Opsview < Puppet::Provider
       Puppet.info "Opsview reload already in progress"
     else
       raise "Was not able to reload Opsview: HTTP code: " + response.code
+    end
+
+  end
+
+  def self.do_reload_opsview
+    @@opsview_classvars[:reload_opsview] = true
+    if (@@opsview_classvars[:seen] == @@opsview_classvars[:total]) && @@opsview_classvars[:forked] == false
+	self.do_actual_reload_opsview
     end
   end
 

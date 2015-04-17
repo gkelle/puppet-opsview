@@ -10,6 +10,12 @@ Puppet::Type.newtype(:opsview_servicecheck) do
           servicecheck is updated"
     defaultto :false
   end
+
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+
   newproperty(:description) do
     desc "Short description for the servicecheck"
   end

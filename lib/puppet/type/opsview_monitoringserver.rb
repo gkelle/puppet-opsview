@@ -11,6 +11,11 @@ Puppet::Type.newtype(:opsview_monitoringserver) do
     defaultto :false
   end
 
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+
   newproperty(:activated) do
     desc "Whether monitoring server is active or not"
     newvalues(:"0",:"1")

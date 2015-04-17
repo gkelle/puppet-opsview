@@ -10,7 +10,12 @@ Puppet::Type.newtype(:opsview_bsmcomponent) do
     desc "True if you want an Opsview reload to be performed when the component is updated"
     defaultto :false
   end
-  
+
+   newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+ 
   newproperty(:required_online) do
     desc "The number of hosts that are required online"
     defaultto 0

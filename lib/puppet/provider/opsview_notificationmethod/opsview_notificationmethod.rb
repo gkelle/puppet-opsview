@@ -44,6 +44,13 @@ Puppet::Type.type(:opsview_notificationmethod).provide :opsview, :parent => Pupp
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.notificationmethod_map(nm)
     p = { :name               => nm["name"],
           :command            => nm["command"],

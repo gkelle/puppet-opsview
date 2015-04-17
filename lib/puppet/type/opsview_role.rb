@@ -10,6 +10,12 @@ Puppet::Type.newtype(:opsview_role) do
       role is updated."
     defaultto :false
   end
+
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+
   newproperty(:role) do
     desc "The name of this role."
     defaultto { @resource[:name] }

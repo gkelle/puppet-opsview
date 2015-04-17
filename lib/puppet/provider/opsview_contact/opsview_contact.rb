@@ -43,6 +43,13 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
 
   mk_resource_methods
 
+  def internal
+    super
+    resource[:internal]
+  end
+  def internal=(should)
+  end
+
   def self.contact_map(contact)
     p = { :name      => contact["name"],
           :full_json => contact,

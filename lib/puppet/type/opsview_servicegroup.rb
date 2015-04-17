@@ -10,7 +10,12 @@ Puppet::Type.newtype(:opsview_servicegroup) do
     desc "True if you want an Opsview reload to be performed when the servicegroup is updated"
     defaultto :false
   end
-  
+
+   newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+ 
   newproperty(:servicegroup) do
     desc "This servicegroup"
     defaultto { @resource[:name] }

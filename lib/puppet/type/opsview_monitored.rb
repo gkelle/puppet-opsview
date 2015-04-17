@@ -11,6 +11,11 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto :false
   end
 
+  newproperty(:internal) do
+    desc "Internal use"
+    defaultto 0
+  end
+
   newproperty(:hostgroup) do
     desc "Opsview hostgroup"
   end
