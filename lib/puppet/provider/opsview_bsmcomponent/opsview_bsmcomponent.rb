@@ -49,7 +49,7 @@ Puppet::Type.type(:opsview_bsmcomponent).provide :opsview, :parent => Puppet::Pr
     p = { :name      => bsmcomponent["name"],
           :hosttemplate => bsmcomponent["host_template"]["name"],
           :has_icon => bsmcomponent["has_icon"],
-	  :required_online => (bsmcomponent["hosts"].count * ( bsmcomponent["quorum_pct"].to_f/100.0) ).round(0).to_s,
+	  :required_online => (bsmcomponent["hosts"].count * ( bsmcomponent["quorum_pct"].to_f/100.0) ).round().to_s,
           :hosts => bsmcomponent["hosts"].collect{ |h| h["name"] },
           :full_json => bsmcomponent,
           :ensure    => :present }
