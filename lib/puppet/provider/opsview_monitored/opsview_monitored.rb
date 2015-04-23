@@ -64,6 +64,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :encrypted_snmpv3_privpassword   => node["encrypted_snmpv3_privpassword"],
           :snmp_version   => node["snmp_version"],
           :snmp_port   => node["snmp_port"],
+          :snmpinterfaces => node["snmpinterfaces"],
           :snmpv3_authpassword => node["snmpv3_authpassword"],
           :snmpv3_authprotocol => node["snmpv3_authprotocol"],
           :snmpv3_privpassword => node["snmpv3_privpassword"],
@@ -92,6 +93,11 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     if defined? node["check_command"]["name"]
       p[:check_command] = node["check_command"]["name"]
     end
+
+    if defined? node["snmpinterfaces"]
+      p[:snmpinterfaces] = node["snmpinterfaces"].collect{ |si| {"interfacename" => si["interfacename"], "active" => si["active"], "discards_critical" => si["discards_critical"], "discards_warning" => si["discards_warning"], "errors_critical" => si["errors_critical"], "throughput_critical" => si["throughput_critical"], "throughput_warning" => si["throughput_warning"] }.delete_if{ |k, v| v.nil?}  }
+    end
+
     if defined? node["snmp_max_msg_size"]
       case node["snmp_max_msg_size"].to_s
         when "0" then 
@@ -276,7 +282,18 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 	}
       end
     end
-    
+
+    @updated_json["snmpinterfaces"] = []
+    if @property_hash[:snmpinterfaces]
+      @property_hash[:snmpinterfaces].each do |si_hash|
+        @updated_json["snmpinterfaces"] << {:interfacename => si_hash["interfacename"], :active => si_hash["active"],
+						:discards_critical => si_hash["discards_critical"], :discards_warning => si_hash["discards_warning"],
+						:errors_critical => si_hash["errors_critical"], :errors_warning => si_hash["errors_warning"],
+						:throughput_critical => si_hash["throughput_critical"], :throughput_warning => si_hash["throughput_warning"],
+	}
+      end
+    end
+
     @updated_json["keywords"] = []
     if @property_hash[:keywords]
       @property_hash[:keywords].each do |kw|

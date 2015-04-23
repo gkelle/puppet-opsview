@@ -291,7 +291,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
     end
 
     begin
-      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1}
+      if @req_type == 'host'
+        response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1, :cols => '+snmpinterfaces'}
+      else
+        response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1}
+      end
     rescue
       @@errorOccurred = 1
       Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!.inspect
@@ -317,7 +321,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
     end
 
     begin
-      response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1}
+      if @req_type == 'host'
+        response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1, :cols => '+snmpinterfaces'}
+      else
+        response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1}
+      end
     rescue
       @@errorOccurred = 1
       Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config: " + $!.inspect

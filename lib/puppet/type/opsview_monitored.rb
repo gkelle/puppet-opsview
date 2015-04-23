@@ -232,6 +232,34 @@ Puppet::Type.newtype(:opsview_monitored) do
     end
   end
 
+  newproperty(:snmpinterfaces, :array_matching => :all) do
+    desc "Array of snmp interfaces for this node"
+
+    def should_to_s(newvalue)
+      newvalue.inspect
+    end
+
+    def is_to_s(currentvalue)
+      currentvalue.inspect
+    end
+
+    def insync?(is)
+      if is.is_a?(Array) and @should.is_a?(Array)
+        is_temp=Array.new
+	should_temp=Array.new
+	is.each do |ha|
+	  (is_temp << ha.sort_by{ |k,v| k})
+	end
+	@should.each do |ha|
+	  (should_temp << ha.sort_by{ |k,v| k})
+	end
+	is_temp.sort == should_temp.sort
+      else
+        is == @should
+      end
+    end
+  end
+
   autorequire(:opsview_hostgroup) do
     [self[:hostgroup]]
   end
