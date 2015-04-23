@@ -233,7 +233,7 @@ Puppet::Type.newtype(:opsview_monitored) do
   end
 
   newproperty(:snmpinterfaces, :array_matching => :all) do
-    desc "Array of snmp interfaces for this node"
+    desc "Array of snmp interface key pairs for this node"
 
     def should_to_s(newvalue)
       newvalue.inspect
