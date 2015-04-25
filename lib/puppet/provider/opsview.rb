@@ -61,6 +61,7 @@ class Puppet::Provider::Opsview < Puppet::Provider
 		   Puppet::Type.type(:opsview_role),
 		   Puppet::Type.type(:opsview_servicecheck),
 		   Puppet::Type.type(:opsview_servicegroup),
+		   Puppet::Type.type(:opsview_tenancy),
 		  ].each do |type|
 			@@opsview_classvars[:total] += resource.catalog.resources.find_all{ |x| x.is_a?(type) }.count
 		  end
@@ -80,11 +81,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
 	end
   end
 
-  def put(body)
-    self.class.put(body)
+  def put(body, type = 0)
+    self.class.put(body, type)
   end
 
-  def self.put(body)
+  def self.put(body, type = 0)
     if @@errorOccurred > 0
       Puppet.warning "put: Problem talking to Opsview server; ignoring Opsview config"
       return
@@ -92,7 +93,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
 
     url = [ config["url"], "config/#{@req_type.downcase}" ].join("/")
     begin
-      response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+      if type == 1
+        response = RestClient.post url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+      else
+        response = RestClient.put url, body, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json
+      end
     rescue
       @@errorOccurred = 1
       Puppet.warning "put_1: Problem sending data to Opsview server; " + $!.inspect + "\n====\n" + url + "\n====\n" + body

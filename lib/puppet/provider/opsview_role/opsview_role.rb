@@ -68,6 +68,9 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
         p[property] = role[property.id2name].collect { |item| item["name"] }
       end
     end
+    if defined? role["tenancy"]["name"]
+      p[:tenancy] = role["tenancy"]["name"]
+    end
     if defined? role["business_services"] and not role["business_services"].nil?
       p[:business_services] = role["business_services"].collect { |service|  {"name" => service["name"], "edit" => service["edit"]} }
     else
@@ -130,6 +133,10 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
       @property_hash[:business_services].each do |bs|
         @updated_json["business_services"] << { :name => bs["name"], :edit => bs["edit"]}
       end
+    end
+    if not @property_hash[:tenancy].to_s.empty?
+      @updated_json["tenancy"] = Hash.new
+      @updated_json["tenancy"]["name"] = @property_hash[:tenancy]
     end
   
     # Flush changes:

@@ -219,6 +219,9 @@ Puppet::Type.newtype(:opsview_role) do
       end
     end
   end
+  newproperty(:tenancy) do
+    desc "Tenancy that the role is a member of"
+  end
   autorequire(:opsview_hostgroup) do
     self[:hostgroups]
   end
@@ -233,6 +236,9 @@ Puppet::Type.newtype(:opsview_role) do
       end
     end
     business_services
+  end
+  autorequire(:opsview_tenancy) do
+    self[:tenancy]
   end
 
 end
