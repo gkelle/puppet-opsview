@@ -228,16 +228,16 @@ Puppet::Type.type(:opsview_attribute).provide :opsview, :parent => Puppet::Provi
       @updated_json["value"] = @property_hash[:value]
     end
 
-    if defined? @property_hash[:label1]
+    if not @property_hash[:label1].nil?
       @updated_json["label1"] = @property_hash[:label1]
     end
-    if defined? @property_hash[:label2]
+    if not @property_hash[:label2].nil?
       @updated_json["label2"] = @property_hash[:label2]
     end
-    if defined? @property_hash[:label3]
+    if not @property_hash[:label3].nil?
       @updated_json["label3"] = @property_hash[:label3]
     end
-    if defined? @property_hash[:label4]
+    if not @property_hash[:label4].nil?
       @updated_json["label4"] = @property_hash[:label4]
     end
 
@@ -321,7 +321,15 @@ Puppet::Type.type(:opsview_attribute).provide :opsview, :parent => Puppet::Provi
        "arg1" :  "",
        "arg2" :  "",
        "arg3" :  "",
-       "arg4" :  ""
+       "arg4" :  "",
+       "label1" : "",
+       "label2" : "",
+       "label3" : "",
+       "label4" : "",
+       "secured1" : "",
+       "secured2" : "",
+       "secured3" : "",
+       "secured4" : ""
      }'
 
     JSON.parse(json.to_s)
