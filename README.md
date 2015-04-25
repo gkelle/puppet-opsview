@@ -40,6 +40,7 @@ Puppet Types in this Module
 * opsview_role
 * opsview_servicecheck
 * opsview_servicegroup
+* opsview_tenancy
 
 List of things to do
 ====================
