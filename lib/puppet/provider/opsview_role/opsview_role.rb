@@ -57,16 +57,21 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
           :ensure    => :present }
 
     [:description, :all_hostgroups,
-     :all_servicegroups, :all_keywords].each do |property|
+     :all_servicegroups, :all_keywords, :all_bsm_components,:all_bsm_edit, :all_bsm_view, :all_monitoringservers].each do |property|
       if defined? role[property.id2name]
         p[property] = role[property.id2name]
       end
     end
     [:access_hostgroups, :access_servicegroups, :access_keywords, :accesses,
-     :hostgroups].each do |property|
+     :hostgroups, :monitoringservers].each do |property|
       if defined? role[property.id2name]
         p[property] = role[property.id2name].collect { |item| item["name"] }
       end
+    end
+    if defined? role["business_services"] and not role["business_services"].nil?
+      p[:business_services] = role["business_services"].collect { |service|  {"name" => service["name"], "edit" => service["edit"]} }
+    else
+      p[:business_services] = []
     end
     p
   end
@@ -106,17 +111,24 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
     # is a bit of a manual task.
     @updated_json["name"] = @resource[:name]
     [:description, :all_hostgroups, :all_servicegroups,
-     :all_keywords].each do |property|
+     :all_keywords, :all_bsm_components,:all_bsm_edit, :all_bsm_view, :all_monitoringservers].each do |property|
       if not @property_hash[property].to_s.empty?
         @updated_json[property.id2name] = @property_hash[property]
       end
     end
     [:access_hostgroups, :access_servicegroups, :access_keywords, :accesses,
-     :hostgroups].each do |property|
+     :hostgroups, :monitoringservers].each do |property|
+      @updated_json[property.id2name] = Array.new
       if not @property_hash[property].to_s.empty?
         @property_hash[property].each do |item|
           @updated_json[property.id2name] << {:name => item}
         end
+      end
+    end
+    if not @property_hash[:business_services].to_s.empty?
+        @updated_json["business_services"] = Array.new
+      @property_hash[:business_services].each do |bs|
+        @updated_json["business_services"] << { :name => bs["name"], :edit => bs["edit"]}
       end
     end
   
@@ -197,21 +209,17 @@ Puppet::Type.type(:opsview_role).provide :opsview, :parent => Puppet::Provider::
        "all_hostgroups" : "1",
        "all_servicegroups" : "1",
        "all_keywords" : "0",
+       "all_bsm_components" : "0",
+       "all_bsm_edit" : "0",
+       "all_bsm_view" : "0",
+       "all_monitoringservers" : "0",
        "access_hostgroups" : [],
        "access_servicegroups" : [],
        "access_keywords" : [],
-       "accesses" : [
-          {
-             "name" : "NOTIFYSOME"
-          },
-          {
-             "name" : "PASSWORDSAVE"
-          },
-          {
-             "name" : "VIEWALL"
-          }
-       ],
-       "hostgroups" : []
+       "accesses" : [],
+       "hostgroups" : [],
+       "business_services" : [],
+       "monitoringservers" : []
     }'
 
     JSON.parse(json.to_s)
