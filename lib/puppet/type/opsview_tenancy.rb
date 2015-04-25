@@ -16,6 +16,10 @@ Puppet::Type.newtype(:opsview_tenancy) do
     defaultto 0
   end
 
+  newproperty(:description) do
+    desc "Description field"
+  end
+
   newproperty(:primary_role) do
     desc "Primary role to use for tenancy"
   end

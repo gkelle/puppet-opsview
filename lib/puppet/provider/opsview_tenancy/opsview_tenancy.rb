@@ -52,6 +52,7 @@ Puppet::Type.type(:opsview_tenancy).provide :opsview, :parent => Puppet::Provide
 
   def self.tenancy_map(tenancy)
     p = { :name      => tenancy["name"],
+          :description      => tenancy["description"],
           :priority      => tenancy["priority"],
           :full_json => tenancy,
           :ensure    => :present }
@@ -98,6 +99,9 @@ Puppet::Type.type(:opsview_tenancy).provide :opsview, :parent => Puppet::Provide
     # structure of the JSON vs the flat nature of the puppet properties, this
     # is a bit of a manual task.
     @updated_json["name"] = @resource[:name]
+    if not @property_hash[:description].to_s.empty?
+      @updated_json["description"] = @property_hash[:description]
+    end
     if not @property_hash[:primary_role].to_s.empty?
       @updated_json["primary_role"]["name"] = @property_hash[:primary_role]
     end
