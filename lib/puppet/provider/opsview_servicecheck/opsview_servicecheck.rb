@@ -58,6 +58,15 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
           :full_json    => servicecheck,
           :ensure       => :present }
     # optional properties
+
+    if defined? servicecheck["cascaded_from"]["name"]
+      p[:cascaded_from] = servicecheck["cascaded_from"]["name"]
+    end
+
+    if defined? servicecheck["checktype"]["name"]
+      p[:checktype] = servicecheck["checktype"]["name"]
+    end
+
     if defined? servicecheck["plugin"]["name"]
       p[:plugin] = servicecheck["plugin"]["name"]
     end
@@ -70,12 +79,77 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if defined? servicecheck["check_period"]["name"]
       p[:check_period] = servicecheck["check_period"]["name"]
     end
+
+    #Notification options
+
+    [:notification_interval, :notification_options].each do |prop|
+     p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
+    end
+
     if defined? servicecheck["notification_period"]["name"]
       p[:notification_period] = servicecheck["notification_period"]["name"]
     end
-    [:check_interval, :check_attempts, :retry_check_interval,
-     :invertresults, :notification_options, :notification_interval,
-     :flap_detection_enabled, :volatile, :stalking].each do |prop|
+
+    #Advanced tab options
+
+    if defined? servicecheck["attribute"]["name"]
+      p[:attribute] = servicecheck["attribute"]["name"]
+    end
+
+    if defined? servicecheck["stalking"]
+      p[:record_output_changes] = servicecheck["stalking"]
+    end
+
+    if defined? servicecheck["volatile"]
+      p[:alert_every_failure] = servicecheck["volatile"]
+    end
+
+    if defined? servicecheck["flap_detection_enabled"]
+      p[:flap_detection] = servicecheck["flap_detection_enabled"]
+    end
+
+    [:event_handler, :markdown_filter, :sensitive_arguments].each do |prop|
+     p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
+    end
+
+    #SNMP Polling
+    [:calculate_rate, :critical_comparison, :critical_value,
+     :label, :warning_comparison, :warning_value, :oid].each do |prop|
+     p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
+    end
+
+    #Passive checks
+    if defined? servicecheck["freshness_type"]
+     p[:action] = servicecheck["freshness_type"]
+    end
+
+    if defined? servicecheck["stale_state"]
+     p[:state] = servicecheck["stale_state"]
+    end
+
+    if defined? servicecheck["stale_text"]
+     p[:text] = servicecheck["stale_text"]
+    end
+
+    if defined? servicecheck["stale_threshold_seconds"]
+     p[:timeout] = servicecheck["stale_threshold_seconds"]
+    end
+
+
+    [:alert_from_failure, :check_freshness].each do |prop|
+      p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
+    end
+
+    #SNMP Trap rules
+    if defined? servicecheck["snmptraprules"]
+      action_map={ "1" => "Send Alert", "0" => "Stop Processing"}
+      alert_level_map={ "0" => "OK", "1" => "WARNING", "2" => "CRITICAL", "3" => "UNKNOWN"}
+      p[:snmptraprules] = servicecheck["snmptraprules"].collect{ |st| {"name" => st["name"], "rule" => st["code"], "action" => action_map[st["process"]], "alert_level" => alert_level_map[st["alertlevel"]], "message" => st["message"] }.delete_if{ |k, v| v.nil?}  }
+    end
+
+    #All other options
+
+    [:check_interval, :check_attempts, :retry_check_interval, :invertresults].each do |prop|
       p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
     end
     p
@@ -139,13 +213,112 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     if not @property_hash[:check_period].to_s.empty?
       @updated_json["check_period"]["name"] = @property_hash[:check_period]
     end
+
+    if not @property_hash[:checktype].to_s.empty?
+      @updated_json["checktype"] = Hash.new
+      @updated_json["checktype"]["name"] = @property_hash[:checktype]
+    end
+
+
+    #Notification Tab
+    [:notification_interval, :notification_options].each do |property|
+      if not @property_hash[property].to_s.empty?
+        @updated_json[property.id2name] = @property_hash[property]
+      end
+    end
+
     if not @property_hash[:notification_period].to_s.empty?
       @updated_json["notification_period"] = Hash.new
       @updated_json["notification_period"]["name"] = @property_hash[:notification_period]
     end
+
+    #Advanced Tab
+    if not @property_hash[:attribute].to_s.empty?
+      @updated_json["attribute"] = Hash.new
+      @updated_json["attribute"]["name"] = @property_hash[:attribute]
+    else
+      @updated_json["attribute"] = nil
+    end
+
+    if not @property_hash[:event_handler].nil?
+      @updated_json["event_handler"] = @property_hash[:event_handler] 
+    end
+
+    if not @property_hash[:record_output_changes].to_s.empty?
+      @updated_json["stalking"] = @property_hash[:record_output_changes] 
+    end
+
+    if not @property_hash[:alert_every_failure].to_s.empty?
+      @updated_json["volatile"] = @property_hash[:alert_every_failure] 
+    end
+
+    if not @property_hash[:flap_detection].to_s.empty?
+      @updated_json["flap_detection_enabled"] = @property_hash[:flap_detection]
+    end
+
+    [:markdown_filter, :sensitive_arguments].each do |property|
+      if not @property_hash[property].to_s.empty?
+        @updated_json[property.id2name] = @property_hash[property]
+      end
+    end
+
+    #SNMP Polling
+    [:critical_value, :label, :warning_value].each do |property|
+      if defined? @property_hash[property]
+        @updated_json[property.id2name] = @property_hash[property]
+      end
+    end
+
+    [:calculate_rate, :critical_comparison, :warning_comparison, :oid].each do |property|
+      if not @property_hash[property].to_s.empty?
+        @updated_json[property.id2name] = @property_hash[property]
+      end
+    end
+
+    #Passive checks
+    if not @property_hash[:action].to_s.empty?
+      @updated_json["freshness_type"] = @property_hash[:action]
+    end
+
+    if not @property_hash[:cascaded_from].nil?
+      @updated_json["cascaded_from"] = Hash.new
+      @updated_json["cascaded_from"]["name"] = @property_hash[:cascaded_from]
+    end
+
+    if not @property_hash[:state].to_s.empty?
+      @updated_json["stale_state"] = @property_hash[:state]
+    end
+
+    if not @property_hash[:text].nil?
+      @updated_json["stale_text"] = @property_hash[:text]
+    end
+
+    if not @property_hash[:timeout].to_s.empty?
+      @updated_json["stale_threshold_seconds"] = @property_hash[:timeout]
+    end
+
+    [:alert_from_failure, :check_freshness].each do |property|
+    if not @property_hash[property].to_s.empty?
+        @updated_json[property.id2name] = @property_hash[property]
+      end
+    end
+
+    #SNMP Trap rules
+    if @property_hash[:snmptraprules].is_a?(Array)
+      action_map={ "Send Alert" => "1", "Stop Processing" => "0"}
+      alert_level_map={ "OK" => "0", "WARNING" => "1", "CRITICAL" => "2", "UNKNOWN" => "3"}
+      @property_hash[:snmptraprules].each do |st_hash|
+        @updated_json["snmptraprules"] << {:name => st_hash["name"], :code => st_hash["rule"],
+						:process => action_map[st_hash["action"]], :alertlevel => alert_level_map[st_hash["alert_level"]],
+						:message => st_hash["message"]
+						}
+      end
+    end
+
+    #Other checks
+
     [:check_interval, :check_attempts, :retry_check_interval,
-     :args, :invertresults, :notification_options,
-     :notification_interval, :flap_detection_enabled, :volatile, :stalking
+     :args, :invertresults
     ].each do |property|
       if not @property_hash[property].to_s.empty?
         @updated_json[property.id2name] = @property_hash[property]
@@ -254,7 +427,21 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
          "flap_detection_enabled" : "1",
          "checktype" : {
             "name" : "Active Plugin"
-         }
+         },
+	 "alert_from_failure" : "1",
+	 "calculate_rate" : "no",
+	 "cascaded_from" : null,
+	 "check_freshness" : "0",
+	 "critical_comparison" : "string",
+	 "critical_value" : "",
+	 "freshness_type" : "set_stale",
+	 "event_handler" : "",
+	 "snmptraprules": [],
+	 "stale_state" : "0",
+	 "stale_text" : "Resetting State",
+	 "stale_threshold_seconds" : "3600",
+	 "warning_comparison" : "numeric",
+	 "warning_value" : ""
      }'
 
     JSON.parse(json.to_s)
