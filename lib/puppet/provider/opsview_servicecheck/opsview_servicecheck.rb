@@ -411,7 +411,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
          "check_period" : {
             "name" : "24x7"
          },
-         "check_interval" : "5",
+         "check_interval" : "300",
          "check_attempts" : "3",
          "retry_check_interval" : "1",
          "plugin" : {
