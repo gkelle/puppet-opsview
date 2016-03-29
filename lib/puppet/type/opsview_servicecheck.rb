@@ -11,6 +11,12 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     defaultto :false
   end
 
+  newparam(:interval_mode) do
+    desc "Controls how to calculate check_intervals (seconds versus minutes)"
+    newvalues(:clever,:minutes,:seconds)
+    defaultto :clever
+  end
+
   newproperty(:internal) do
     desc "Internal use"
     defaultto 0
@@ -237,10 +243,48 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     end
   end
 
+  newproperty(:check_interval) do
+    desc "Check Interval parameter"
+
+    def should_to_s(newvalue)
+      multiplier=1
+      if (@resource[:interval_mode].to_s == "clever" and newvalue.to_i < 30) or @resource[:interval_mode].to_s == "minutes"
+        multiplier=60
+      end
+      newvalue.to_i * multiplier
+    end
+
+    def insync?(is)
+      if is == :absent
+        :false
+      end
+
+      multiplier=1
+
+      if is.is_a?(Array) 
+        is_f=is.first
+      else
+        is_f=is
+      end
+
+      if @should.is_a?(Array)
+        should_f=@should.first
+      else
+        should_f=@should
+      end
+
+      if (@resource[:interval_mode].to_s == "clever" and should_f.to_i < 30) or @resource[:interval_mode].to_s == "minutes"
+        multiplier=60
+      end
+
+      adjusted_value=should_f.to_i * multiplier
+      is_f.to_i == adjusted_value
+    end
+  end
 
   #General properties
 
-  [:check_period, :check_interval, :check_attempts, :retry_check_interval,
+  [:check_period, :check_attempts, :retry_check_interval,
    :plugin, :args, :invertresults].each do |property|
     newproperty(property) do
       desc "General opsview servicecheck parameter"
