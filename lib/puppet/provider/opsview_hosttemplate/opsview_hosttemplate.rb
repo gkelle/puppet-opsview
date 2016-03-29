@@ -54,7 +54,6 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
     p = { :name           => hosttemplate["name"],
           :hosttemplate   => hosttemplate["name"],
           :description    => hosttemplate["description"],
-          :servicechecks  => hosttemplate["servicechecks"].collect { |sc| sc["name"] },
           # managementurls as read from Opsview is a list of hashes, where each hash
           # has "name" and "url" key. Assign this list directly to :managementurls
           :managementurls => hosttemplate["managementurls"],
@@ -62,6 +61,9 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
           :ensure         => :present }
 
     # Process optional properties here
+    if defined? hosttemplate["servicechecks"]
+      p[:servicechecks] = hosttemplate["servicechecks"].collect{ |sc| {"name" => sc["name"], "event_handler" => sc["event_handler"], "exception" => sc["exception"]}.delete_if{ |k, v| v.nil?}  }
+    end
 
     p
 
@@ -103,9 +105,11 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
     @updated_json["name"] = @resource[:name]
     @updated_json["description"] = @property_hash[:description]
     @updated_json["servicechecks"] = []
-    if @property_hash[:servicechecks]
-      @property_hash[:servicechecks].each do |sc|
-        @updated_json["servicechecks"] << { :name => sc }
+    if not @property_hash[:servicechecks].empty?
+      @property_hash[:servicechecks].each do |sc_hash|
+        @updated_json["servicechecks"] << {:name => sc_hash["name"], :event_handler => sc_hash["event_handler"],
+						:exception => sc_hash["exception"]
+        }
       end
     end
 
