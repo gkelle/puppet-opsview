@@ -56,7 +56,11 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
   end
   
   autorequire(:opsview_servicecheck) do
-    self[:servicechecks]
+    sc=Array.new
+    self[:servicechecks].each do |name|    
+      sc << name['name']
+    end
+    sc
   end
   
 end

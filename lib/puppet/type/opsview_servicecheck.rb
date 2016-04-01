@@ -255,16 +255,16 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     end
 
     def insync?(is)
-      if is == :absent
-        :false
-      end
-
       multiplier=1
 
       if is.is_a?(Array) 
         is_f=is.first
       else
-        is_f=is
+        if is == :absent
+	  is_f=300
+	else
+          is_f=is
+	end
       end
 
       if @should.is_a?(Array)

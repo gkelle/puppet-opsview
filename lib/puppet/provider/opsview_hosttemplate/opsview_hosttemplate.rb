@@ -116,12 +116,11 @@ Puppet::Type.type(:opsview_hosttemplate).provide :opsview, :parent => Puppet::Pr
     # If managementurls are set in the manifest update the JSON content for the
     # managementurls object with a list of hashes where each hash has a "name"
     # and an "url" key.
+    @updated_json["managementurls"] = []
     if not @property_hash[:managementurls].empty?
       @property_hash[:managementurls].each do |mu|
         @updated_json["managementurls"] << { "name" => mu["name"], "url" => mu["url"] }
       end
-    else
-      @updated_json["managementurls"] = []
     end
   
     # Flush changes:
