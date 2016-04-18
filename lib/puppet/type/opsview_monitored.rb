@@ -29,7 +29,7 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
@@ -41,7 +41,7 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
@@ -53,7 +53,7 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
@@ -74,7 +74,7 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
