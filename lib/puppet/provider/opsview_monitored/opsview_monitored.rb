@@ -73,7 +73,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :tidy_ifdescr_level => node["tidy_ifdescr_level"],
           :snmp_extended_throughput_data => node["snmp_extended_throughput_data"],
           :icon_name => node["icon"]["name"],
-          :notification_interval => node["notification_interval"],
           :full_json     => node,
           :ensure        => :present }
           
@@ -130,6 +129,13 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           p[:tidy_ifdescr_level] = "level3"
       end
     end
+
+    #All other options
+
+    [:check_interval, :retry_check_interval, :notification_interval].each do |prop|
+      p[prop] = node[prop.id2name] if defined? node[prop.id2name]
+    end
+
     p
   end
 
@@ -199,7 +205,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
 
     @updated_json["snmp_version"] = @property_hash[:snmp_version]
     @updated_json["snmp_port"] = @property_hash[:snmp_port]
-    @updated_json["notification_interval"] = @property_hash[:notification_interval]
 
 
     if not  @property_hash[:snmpv3_authprotocol].to_s.empty?
@@ -311,6 +316,21 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     if not @property_hash[:monitored_by].to_s.empty?
       @updated_json["monitored_by"]["name"] = @property_hash[:monitored_by]
     end
+
+    [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+      #interval_mode will determine how the interval gets set
+      if not @property_hash[property].to_s.empty?
+        multiplier = 1
+        if defined? @resource[:interval_mode]
+          if (@resource[:interval_mode].to_s == "clever" and @property_hash[property].to_i < 30) or @resource[:interval_mode].to_s == "minutes"
+  	  multiplier = 60
+  	end
+        end
+        adjusted_interval = @property_hash[property].to_i * multiplier
+        @updated_json[property.id2name] = adjusted_interval
+        Puppet.debug "The adjusted interval is #{adjusted_interval} for #{property.id2name}"
+      end
+    end
   
     put @updated_json.to_json
 
@@ -410,7 +430,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
        "icon" : {
           "name" : "LOGO - Opsview"
        },
-       "retry_check_interval" : "1",
+       "retry_check_interval" : "60",
        "ip" : "localhost",
        "use_mrtg" : "0",
        "servicechecks" : [],
@@ -428,8 +448,8 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           "name" : "ping"
        },
        "check_attempts" : "2",
-       "check_interval" : "0",
-       "notification_interval" : "60",
+       "check_interval" : "300",
+       "notification_interval" : "3600",
        "snmp_port" : "161",
        "snmpv3_username" : "",
        "other_addresses" : ""

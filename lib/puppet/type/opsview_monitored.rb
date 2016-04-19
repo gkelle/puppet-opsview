@@ -11,6 +11,12 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto :false
   end
 
+  newparam(:interval_mode) do
+    desc "Controls how to calculate intervals (seconds versus minutes)"
+    newvalues(:clever,:minutes,:seconds)
+    defaultto :clever
+  end
+
   newproperty(:internal) do
     desc "Internal use"
     defaultto 0
@@ -22,6 +28,49 @@ Puppet::Type.newtype(:opsview_monitored) do
 
   newproperty(:ip) do
     desc "Node IP address or name"
+  end
+
+#Intervals
+
+  [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+    newproperty(property) do
+      desc "Interval parameter"
+  
+      def should_to_s(newvalue)
+        multiplier=1
+        if (@resource[:interval_mode].to_s == "clever" and newvalue.to_i < 30) or @resource[:interval_mode].to_s == "minutes"
+          multiplier=60
+        end
+        newvalue.to_i * multiplier
+      end
+  
+      def insync?(is)
+        multiplier=1
+  
+        if is.is_a?(Array) 
+          is_f=is.first
+        else
+          if is == :absent
+  	    is_f=300
+  	  else
+            is_f=is
+  	  end
+        end
+  
+        if @should.is_a?(Array)
+          should_f=@should.first
+        else
+          should_f=@should
+        end
+  
+        if (@resource[:interval_mode].to_s == "clever" and should_f.to_i < 30) or @resource[:interval_mode].to_s == "minutes"
+          multiplier=60
+        end
+  
+        adjusted_value=should_f.to_i * multiplier
+        is_f.to_i == adjusted_value
+      end
+    end
   end
 
   newproperty(:hosttemplates, :array_matching => :all) do
@@ -64,11 +113,6 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "The Opsview server that monitors this node"
   end
 
-  newproperty(:notification_interval) do
-    desc "Host notification interval"
-    defaultto '0'
-  end
-  
   newproperty(:parents, :array_matching => :all) do
     desc "Array of parents for this node"
     defaultto []

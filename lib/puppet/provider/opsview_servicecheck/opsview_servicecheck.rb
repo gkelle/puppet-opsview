@@ -221,7 +221,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 
 
     #Notification Tab
-    [:notification_interval, :notification_options].each do |property|
+    [:notification_options].each do |property|
       if not @property_hash[property].to_s.empty?
         @updated_json[property.id2name] = @property_hash[property]
       end
@@ -314,23 +314,25 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 						}
       end
     end
-
-    #interval_mode will determine how the check_interval gets set
-    if not @property_hash[:check_interval].to_s.empty?
-      multiplier = 1
-      if defined? @resource[:interval_mode]
-        if (@resource[:interval_mode].to_s == "clever" and @property_hash[:check_interval].to_i < 30) or @resource[:interval_mode].to_s == "minutes"
-	  multiplier = 60
-	end
+    
+    [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+      #interval_mode will determine how the interval gets set
+      if not @property_hash[property].to_s.empty?
+        multiplier = 1
+        if defined? @resource[:interval_mode]
+          if (@resource[:interval_mode].to_s == "clever" and @property_hash[property].to_i < 30) or @resource[:interval_mode].to_s == "minutes"
+  	  multiplier = 60
+  	end
+        end
+        adjusted_interval = @property_hash[property].to_i * multiplier
+        @updated_json[property.id2name] = adjusted_interval
+        Puppet.debug "The adjusted interval is #{adjusted_interval} for #{property.id2name}"
       end
-      adjusted_interval = @property_hash[:check_interval].to_i * multiplier
-      @updated_json["check_interval"] = adjusted_interval
-      Puppet.debug "The adjusted interval is #{adjusted_interval}"
     end
 
     #Other checks
 
-    [:check_attempts, :retry_check_interval,
+    [:check_attempts,
      :args, :invertresults
     ].each do |property|
       if not @property_hash[property].to_s.empty?
@@ -426,7 +428,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
          },
          "check_interval" : "300",
          "check_attempts" : "3",
-         "retry_check_interval" : "1",
+         "retry_check_interval" : "60",
          "plugin" : {
             "name" : "check_nrpe"
          },
