@@ -14,6 +14,18 @@ Puppet::Type.newtype(:opsview_monitored) do
   newparam(:interval_mode) do
     desc "Controls how to calculate intervals (seconds versus minutes)"
     newvalues(:clever,:minutes,:seconds)
+    munge do |value|
+      [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+         if not resource[property].nil?
+           if (value.to_s == "minutes" or (resource[property].to_i < 30 and value.to_s == "clever"))
+             resource[property] = resource[property].to_i*60
+             Puppet.debug "Munged #{resource} #{property.to_s}: #{resource[property]}"
+	   end
+         end
+      end
+      value
+    end
+
     defaultto :clever
   end
 
@@ -31,45 +43,9 @@ Puppet::Type.newtype(:opsview_monitored) do
   end
 
 #Intervals
-
   [:check_interval, :notification_interval, :retry_check_interval].each do |property|
     newproperty(property) do
       desc "Interval parameter"
-  
-      def should_to_s(newvalue)
-        multiplier=1
-        if (@resource[:interval_mode].to_s == "clever" and newvalue.to_i < 30) or @resource[:interval_mode].to_s == "minutes"
-          multiplier=60
-        end
-        newvalue.to_i * multiplier
-      end
-  
-      def insync?(is)
-        multiplier=1
-  
-        if is.is_a?(Array) 
-          is_f=is.first
-        else
-          if is == :absent
-  	    is_f=300
-  	  else
-            is_f=is
-  	  end
-        end
-  
-        if @should.is_a?(Array)
-          should_f=@should.first
-        else
-          should_f=@should
-        end
-  
-        if (@resource[:interval_mode].to_s == "clever" and should_f.to_i < 30) or @resource[:interval_mode].to_s == "minutes"
-          multiplier=60
-        end
-  
-        adjusted_value=should_f.to_i * multiplier
-        is_f.to_i == adjusted_value
-      end
     end
   end
 

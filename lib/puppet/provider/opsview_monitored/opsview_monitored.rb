@@ -320,15 +320,8 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
     [:check_interval, :notification_interval, :retry_check_interval].each do |property|
       #interval_mode will determine how the interval gets set
       if not @property_hash[property].to_s.empty?
-        multiplier = 1
-        if defined? @resource[:interval_mode]
-          if (@resource[:interval_mode].to_s == "clever" and @property_hash[property].to_i < 30) or @resource[:interval_mode].to_s == "minutes"
-  	  multiplier = 60
-  	end
-        end
-        adjusted_interval = @property_hash[property].to_i * multiplier
-        @updated_json[property.id2name] = adjusted_interval
-        Puppet.debug "The adjusted interval is #{adjusted_interval} for #{property.id2name}"
+        Puppet.debug "The property_hash is #{@property_hash[property].to_s}"
+        @updated_json[property.id2name] = @property_hash[property]
       end
     end
   
