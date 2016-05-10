@@ -27,9 +27,16 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
   newproperty(:servicechecks, :array_matching => :all) do
     desc "Array of servicechecks for this hosttemplate."
     defaultto []
+    munge do |value|
+     if value.is_a?(String)
+       { "name" => value }
+     else
+       value
+     end
+    end
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is - @should == @should - is
       else
         is == @should
       end
@@ -49,7 +56,11 @@ Puppet::Type.newtype(:opsview_hosttemplate) do
   end
   
   autorequire(:opsview_servicecheck) do
-    self[:servicechecks]
+    sc=Array.new
+    self[:servicechecks].each do |name|    
+      sc << name['name']
+    end
+    sc
   end
   
 end

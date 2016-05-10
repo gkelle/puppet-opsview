@@ -221,7 +221,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 
 
     #Notification Tab
-    [:notification_interval, :notification_options].each do |property|
+    [:notification_options].each do |property|
       if not @property_hash[property].to_s.empty?
         @updated_json[property.id2name] = @property_hash[property]
       end
@@ -314,10 +314,18 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 						}
       end
     end
+    
+    [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+      #interval_mode will determine how the interval gets set
+      if not @property_hash[property].to_s.empty?
+        Puppet.debug "The property_hash is #{@property_hash[property].to_s}"
+        @updated_json[property.id2name] = @property_hash[property]
+      end
+    end
 
     #Other checks
 
-    [:check_interval, :check_attempts, :retry_check_interval,
+    [:check_attempts,
      :args, :invertresults
     ].each do |property|
       if not @property_hash[property].to_s.empty?
@@ -411,9 +419,9 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
          "check_period" : {
             "name" : "24x7"
          },
-         "check_interval" : "5",
+         "check_interval" : "300",
          "check_attempts" : "3",
-         "retry_check_interval" : "1",
+         "retry_check_interval" : "60",
          "plugin" : {
             "name" : "check_nrpe"
          },

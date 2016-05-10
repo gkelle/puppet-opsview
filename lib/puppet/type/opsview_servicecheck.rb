@@ -11,6 +11,24 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     defaultto :false
   end
 
+  newparam(:interval_mode) do
+    desc "Controls how to calculate intervals (seconds versus minutes)"
+    newvalues(:clever,:minutes,:seconds)
+    munge do |value|
+      [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+         if not resource[property].nil?
+           if (value.to_s == "minutes" or (resource[property].to_i < 30 and value.to_s == "clever"))
+             resource[property] = resource[property].to_i*60
+             Puppet.debug "Munged #{resource} #{property.to_s}: #{resource[property]}"
+	   end
+         end
+      end
+      value
+    end
+
+    defaultto :clever
+  end
+
   newproperty(:internal) do
     desc "Internal use"
     defaultto 0
@@ -93,7 +111,7 @@ Puppet::Type.newtype(:opsview_servicecheck) do
   end
 
   #Fields for notifications
-  [:notification_interval, :notification_options,:notification_period].each do |property|
+  [:notification_options,:notification_period].each do |property|
     newproperty(property) do
       desc "General opsview polling servicecheck parameter"
     end
@@ -237,10 +255,15 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     end
   end
 
+  [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+    newproperty(property) do
+      desc "Interval parameter"
+    end
+  end
 
   #General properties
 
-  [:check_period, :check_interval, :check_attempts, :retry_check_interval,
+  [:check_period, :check_attempts,
    :plugin, :args, :invertresults].each do |property|
     newproperty(property) do
       desc "General opsview servicecheck parameter"

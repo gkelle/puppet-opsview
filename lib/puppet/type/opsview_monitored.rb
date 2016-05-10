@@ -11,6 +11,24 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto :false
   end
 
+  newparam(:interval_mode) do
+    desc "Controls how to calculate intervals (seconds versus minutes)"
+    newvalues(:clever,:minutes,:seconds)
+    munge do |value|
+      [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+         if not resource[property].nil?
+           if (value.to_s == "minutes" or (resource[property].to_i < 30 and value.to_s == "clever"))
+             resource[property] = resource[property].to_i*60
+             Puppet.debug "Munged #{resource} #{property.to_s}: #{resource[property]}"
+	   end
+         end
+      end
+      value
+    end
+
+    defaultto :clever
+  end
+
   newproperty(:internal) do
     desc "Internal use"
     defaultto 0
@@ -24,12 +42,19 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "Node IP address or name"
   end
 
+#Intervals
+  [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+    newproperty(property) do
+      desc "Interval parameter"
+    end
+  end
+
   newproperty(:hosttemplates, :array_matching => :all) do
     desc "Array of Opsview host templates that should be applied to this node"
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
@@ -41,7 +66,7 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
@@ -53,7 +78,7 @@ Puppet::Type.newtype(:opsview_monitored) do
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
@@ -64,17 +89,12 @@ Puppet::Type.newtype(:opsview_monitored) do
     desc "The Opsview server that monitors this node"
   end
 
-  newproperty(:notification_interval) do
-    desc "Host notification interval"
-    defaultto '0'
-  end
-  
   newproperty(:parents, :array_matching => :all) do
     desc "Array of parents for this node"
     defaultto []
     def insync?(is)
       if is.is_a?(Array) and @should.is_a?(Array)
-        is.sort == @should.sort
+        is.sort == @should.uniq.sort
       else
         is == @should
       end
