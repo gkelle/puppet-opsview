@@ -84,7 +84,35 @@ Puppet::Type.newtype(:opsview_monitored) do
       end
     end
   end
-  
+
+  newproperty(:notification_options) do
+    desc "Notification options for host"
+    validate do |value|
+      unless value =~/^([udrf](,[udrf])*)?$/
+        raise ArgumentError, "%s is not a valid notification option - input should be a comma-separated list of u,d,r,f" % value
+      end
+    end
+    def insync?(is)
+      if is != :absent and @should.is_a?(Array)
+        is.split(",").sort == @should.first.split(",").sort
+      else
+        is == @should
+      end
+    end
+  end
+
+  newproperty(:notification_period) do
+    desc "Notification period for host"
+  end
+
+   newproperty(:check_period) do
+    desc "Check period for host"
+  end
+ 
+   newproperty(:check_attempts) do
+    desc "Number of check attempts for host"
+  end
+
   newproperty(:monitored_by) do
     desc "The Opsview server that monitors this node"
   end
@@ -299,4 +327,13 @@ Puppet::Type.newtype(:opsview_monitored) do
   autorequire(:opsview_keyword) do
     self[:keywords]
   end
+
+  autorequire(:opsview_timeperiod) do
+    self[:notification_period]
+  end
+
+  autorequire(:opsview_timeperiod) do
+    self[:check_period]
+  end
+
 end

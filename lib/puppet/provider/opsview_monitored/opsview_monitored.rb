@@ -77,6 +77,18 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :ensure        => :present }
           
     # optional properties
+    if defined? node["notification_options"]
+      p[:notification_options] = node["notification_options"]
+    end
+    if defined? node["notification_period"]["name"]
+      p[:notification_period] = node["notification_period"]["name"]
+    end
+    if defined? node["check_period"]["name"]
+      p[:check_period] = node["check_period"]["name"]
+    end
+    if defined? node["check_attempts"]
+      p[:check_attempts] = node["check_attempts"]
+    end
     if defined? node["parents"]
       p[:parents] = node["parents"].collect{ |prnt| prnt["name"] }
     end
@@ -312,7 +324,23 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
         @updated_json["parents"] << {:name => pa}
       end
     end
-    
+
+    if @property_hash[:notification_options]
+      @updated_json["notification_options"] = @property_hash[:notification_options]
+    end
+
+    if @property_hash[:notification_period]
+      @updated_json["notification_period"]["name"] = @property_hash[:notification_period]
+    end
+
+    if @property_hash[:check_period]
+      @updated_json["check_period"]["name"] = @property_hash[:check_period]
+    end
+
+    if @property_hash[:check_attempts]
+      @updated_json["check_attempts"] = @property_hash[:check_attempts]
+    end
+  
     if not @property_hash[:monitored_by].to_s.empty?
       @updated_json["monitored_by"]["name"] = @property_hash[:monitored_by]
     end
