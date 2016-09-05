@@ -20,7 +20,7 @@ Puppet::Type.newtype(:opsview_timeperiod) do
     newproperty(property) do
       desc "Day of the week"
       validate do |value|
-        unless value =~ /^(?<!,)(\d{2}:\d{2}-\d{2}:\d{2}(,\d{2}:\d{2}-\d{2}:\d{2})*)?$/
+        unless value =~ /^(\d{2}:\d{2}-\d{2}:\d{2}(,\d{2}:\d{2}-\d{2}:\d{2})*)?$/
           raise ArgumentError, "%s is not a valid time period - format is HH:MM-HH:MM[,HH:MM-HH:MM][...] " % value
         end
       end
