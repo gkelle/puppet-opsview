@@ -17,7 +17,7 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     munge do |value|
       [:check_interval, :notification_interval, :retry_check_interval].each do |property|
          if not resource[property].nil?
-           if (value.to_s == "minutes" or (resource[property].to_i < 30 and value.to_s == "clever"))
+           if ( not resource[property].to_s.eql? "null" and ( value.to_s == "minutes" or (resource[property].to_i < 30 and value.to_s == "clever") ) )
              resource[property] = resource[property].to_i*60
              Puppet.debug "Munged #{resource} #{property.to_s}: #{resource[property]}"
 	   end
@@ -255,7 +255,23 @@ Puppet::Type.newtype(:opsview_servicecheck) do
     end
   end
 
-  [:check_interval, :notification_interval, :retry_check_interval].each do |property|
+  newproperty(:notification_interval) do
+    desc "Interval parameter"
+
+    def insync?(is)
+      if is == :absent and @should.first.eql? "null"
+        true
+      else
+        if is != :absent
+          is.to_i == @should.first.to_i
+	else
+	  is == @should
+	end
+      end
+    end
+  end
+
+  [:check_interval, :retry_check_interval].each do |property|
     newproperty(property) do
       desc "Interval parameter"
     end

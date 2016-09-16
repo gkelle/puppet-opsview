@@ -82,12 +82,20 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 
     #Notification options
 
-    [:notification_interval, :notification_options].each do |prop|
+    if defined? servicecheck["notification_interval"]
+      p[:notification_interval] = servicecheck["notification_interval"]
+    else
+      p[:notification_interval] = "null"
+    end
+
+    [:notification_options].each do |prop|
      p[prop] = servicecheck[prop.id2name] if defined? servicecheck[prop.id2name]
     end
 
     if defined? servicecheck["notification_period"]["name"]
       p[:notification_period] = servicecheck["notification_period"]["name"]
+    else
+      p[:notification_period] = "null"
     end
 
     #Advanced tab options
@@ -229,7 +237,11 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
 
     if not @property_hash[:notification_period].to_s.empty?
       @updated_json["notification_period"] = Hash.new
-      @updated_json["notification_period"]["name"] = @property_hash[:notification_period]
+      if @property_hash[:notification_period].eql? "null"
+        @updated_json["notification_period"] = nil
+      else
+        @updated_json["notification_period"]["name"] = @property_hash[:notification_period]
+      end
     end
 
     #Advanced Tab
@@ -318,8 +330,12 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     [:check_interval, :notification_interval, :retry_check_interval].each do |property|
       #interval_mode will determine how the interval gets set
       if not @property_hash[property].to_s.empty?
-        Puppet.debug "The property_hash is #{@property_hash[property].to_s}"
-        @updated_json[property.id2name] = @property_hash[property]
+        if property.to_s.eql? "notification_interval" and @property_hash[property].eql? "null"
+	  @updated_json[property.id2name] = nil
+	else
+          Puppet.debug "The property_hash is #{@property_hash[property].to_s}"
+          @updated_json[property.id2name] = @property_hash[property]
+	end
       end
     end
 
