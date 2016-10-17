@@ -59,9 +59,6 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :hostattributes => node["hostattributes"],
           :enable_snmp   => node["enable_snmp"],
           :snmp_community   => node["snmp_community"],
-          :encrypted_snmp_community   => node["encrypted_snmp_community"],
-          :encrypted_snmpv3_authpassword   => node["encrypted_snmpv3_authpassword"],
-          :encrypted_snmpv3_privpassword   => node["encrypted_snmpv3_privpassword"],
           :snmp_version   => node["snmp_version"],
           :snmp_port   => node["snmp_port"],
           :snmpinterfaces => node["snmpinterfaces"],
@@ -77,6 +74,12 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
           :ensure        => :present }
           
     # optional properties
+    if get_api_version >= 4.6
+          p[:encrypted_snmp_community] = node["encrypted_snmp_community"],
+          p[:encrypted_snmpv3_authpassword] = node["encrypted_snmpv3_authpassword"],
+          p[:encrypted_snmpv3_privpassword] =  node["encrypted_snmpv3_privpassword"]
+    end
+
     if defined? node["notification_options"]
       p[:notification_options] = node["notification_options"]
     end
@@ -105,7 +108,7 @@ Puppet::Type.type(:opsview_monitored).provide :opsview, :parent => Puppet::Provi
       p[:check_command] = node["check_command"]["name"]
     end
 
-    if defined? node["snmpinterfaces"]
+    if node.has_key? "snmpinterfaces"
       p[:snmpinterfaces] = node["snmpinterfaces"].collect{ |si| {"interfacename" => si["interfacename"], "active" => si["active"], "discards_critical" => si["discards_critical"], "discards_warning" => si["discards_warning"], "errors_critical" => si["errors_critical"], "throughput_critical" => si["throughput_critical"], "throughput_warning" => si["throughput_warning"] }.delete_if{ |k, v| v.nil?}  }
     end
 

@@ -149,7 +149,7 @@ Puppet::Type.type(:opsview_servicecheck).provide :opsview, :parent => Puppet::Pr
     end
 
     #SNMP Trap rules
-    if defined? servicecheck["snmptraprules"]
+    if servicecheck.has_key? "snmptraprules"
       action_map={ "1" => "Send Alert", "0" => "Stop Processing"}
       alert_level_map={ "0" => "OK", "1" => "WARNING", "2" => "CRITICAL", "3" => "UNKNOWN"}
       p[:snmptraprules] = servicecheck["snmptraprules"].collect{ |st| {"name" => st["name"], "rule" => st["code"], "action" => action_map[st["process"]], "alert_level" => alert_level_map[st["alertlevel"]], "message" => st["message"] }.delete_if{ |k, v| v.nil?}  }

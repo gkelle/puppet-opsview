@@ -14,7 +14,8 @@ class Puppet::Provider::Opsview < Puppet::Provider
 	:seen => 0,
 	:forked => false,
 	:reload_opsview => false,
-	:sleeptime => 10
+	:sleeptime => 10,
+	:api_version => 0
   }
 
   def create
@@ -283,6 +284,19 @@ class Puppet::Provider::Opsview < Puppet::Provider
     self.class.get_resources
   end
 
+  def self.get_api_version
+    if (@@opsview_classvars[:api_version] == 0)
+      api_info = self.get_api_status("info")
+      @@opsview_classvars[:api_version] = api_info["opsview_version"].to_f
+    end
+
+    @@opsview_classvars[:api_version]
+  end
+  
+  def get_api_version
+    self.class.get_api_version
+  end
+
   def self.get_resource(name = nil)
     if @@errorOccurred > 0
       Puppet.warning "get_resource: Problem talking to Opsview server; ignoring Opsview config"
@@ -294,9 +308,11 @@ class Puppet::Provider::Opsview < Puppet::Provider
     else
       url = URI.escape( [ config["url"], "config/#{@req_type.downcase}?s.name=#{name}" ].join("/") )
     end
+    
+    self.get_api_version
 
     begin
-      if @req_type == 'host'
+      if @req_type == 'host' and @@opsview_classvars[:api_version] > 4.6
         response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1, :cols => '+snmpinterfaces'}
       else
         response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1}
@@ -325,8 +341,10 @@ class Puppet::Provider::Opsview < Puppet::Provider
       return
     end
 
+    self.get_api_version
+
     begin
-      if @req_type == 'host'
+      if @req_type == 'host' and @@opsview_classvars[:api_version] > 4.6
         response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1, :cols => '+snmpinterfaces'}
       else
         response = RestClient.get url, :x_opsview_username => config["username"], :x_opsview_token => token, :content_type => :json, :accept => :json, :params => {:rows => :all, :include_encrypted => 1}
