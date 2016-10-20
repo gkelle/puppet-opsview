@@ -70,25 +70,22 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
       p[:role] = contact["role"]["name"]
     end
     if defined? contact["notificationprofiles"]
-      contact["notificationprofiles"].each do |profile|
-        if profile["name"] == "8x5"
-          p[:hostgroups8x5] = profile["hostgroups"].collect{ |hg| hg["name"] }
-          p[:allhostgroups8x5] = profile["all_hostgroups"]
-          p[:servicegroups8x5] = profile["servicegroups"].collect{ |sg| sg["name"] }
-          p[:allservicegroups8x5] = profile["all_servicegroups"]
-          p[:notificationmethods8x5] = profile["notificationmethods"].collect{ |nm| nm["name"] }
-          p[:service_notification_options8x5] = profile["service_notification_options"]
-          p[:host_notification_options8x5] = profile["host_notification_options"]
-        elsif profile["name"] == "24x7"
-          p[:hostgroups24x7] = profile["hostgroups"].collect{ |hg| hg["name"] }
-          p[:allhostgroups24x7] = profile["all_hostgroups"]
-          p[:servicegroups24x7] = profile["servicegroups"].collect{ |sg| sg["name"] }
-          p[:allservicegroups24x7] = profile["all_servicegroups"]
-          p[:notificationmethods24x7] = profile["notificationmethods"].collect{ |nm| nm["name"] }
-          p[:service_notification_options24x7] = profile["service_notification_options"]
-          p[:host_notification_options24x7] = profile["host_notification_options"]
-        end
+      p[:notificationprofiles] = []
+      np_hash = {}
+      contact["notificationprofiles"].each do |np|
+        np.keys.each do |k|
+	  next if k == "ref"
+	  if np[k].is_a?(Array)
+	    np[k].each do |npk|
+	     npk.delete_if { |key, value| key == "ref" } if npk.is_a?(Hash)
+	    end
+	  elsif np[k].is_a?(Hash)
+	    np[k].delete_if { |key, value| key == "ref" }
+	  end
+	end
+	np_hash[np['name']] = np
       end
+      p[:notificationprofiles] << np_hash
     end
     p
   end
@@ -141,8 +138,17 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
     if not @property_hash[:role].to_s.empty?
       @updated_json["role"]["name"] = @property_hash[:role]
     end
-    # Update @updated_json["notificationprofiles"]
-    update_notificationprofiles
+    
+    if @property_hash[:notificationprofiles]
+      @merged_np=[]
+      @base_np = default_notificationprofile
+      @property_hash[:notificationprofiles].first.keys.each do |np|
+        temp_np = @base_np.merge(@property_hash[:notificationprofiles].first[np])
+	temp_np["name"] = np
+	@merged_np << temp_np
+      end
+      @updated_json["notificationprofiles"] = @merged_np
+    end
 
     # Flush changes:
     put @updated_json.to_json
@@ -213,6 +219,39 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
     @property_hash.dup
   end
 
+  def default_notificationprofile 
+    json = '
+     {
+            "all_business_components" : "0",
+            "all_business_services" : "0",
+            "all_hostgroups" : "0",
+            "all_keywords" : "0",
+            "all_servicegroups" : "0",
+            "business_component_availability_below" : "99.999",
+            "business_component_options" : "f,i",
+            "business_component_renotification_interval" : "1800",
+            "business_components" : [],
+            "business_service_availability_below" : "99.999",
+            "business_service_options" : "o,i",
+            "business_service_renotification_interval" : "1800",
+            "business_services" : [],
+            "host_notification_options" : "u,d,r,f",
+            "hostgroups" : [],
+            "include_component_notes" : "0",
+            "include_service_notes" : "0",
+            "keywords" : [],
+            "notification_level" : "1",
+            "notification_level_stop" : "0",
+            "notification_period" : {
+               "name" : "24x7"
+            },
+            "notificationmethods" : [],
+            "service_notification_options" : "w,c,r,f",
+            "servicegroups" : []
+     }'
+     JSON.parse(json.to_s)
+  end
+
   def default_contact
     json = '
      {
@@ -243,42 +282,7 @@ Puppet::Type.type(:opsview_contact).provide :opsview, :parent => Puppet::Provide
               "name" : "RSS_MAXIMUM_ITEMS"
            }
         ],
-        "notificationprofiles" : [
-           {
-              "name" : "24x7",
-              "host_notification_options" : "u,d,r,f",
-              "notificationmethods" : [
-                 { "name" : "Email" }
-              ],
-              "servicegroups" : [],
-              "all_servicegroups" : "1",
-              "all_hostgroups" : "0",
-              "keywords" : [],
-              "service_notification_options" : "w,c,r,u,f",
-              "hostgroups" : [],
-              "notification_level" : "1",
-              "notification_period" : {
-                 "name" : "24x7"
-              }
-           },
-           {
-              "name" : "8x5",
-              "host_notification_options" : "u,d,r,f",
-              "notificationmethods" : [
-                 { "name" : "Email" }
-              ],
-              "servicegroups" : [],
-              "all_servicegroups" : "1",
-              "all_hostgroups" : "0",
-              "keywords" : [],
-              "service_notification_options" : "w,c,r,u,f",
-              "hostgroups" : [],
-              "notification_level" : "1",
-              "notification_period" : {
-                 "name" : "workhours"
-              }
-           }
-        ]
+        "notificationprofiles" : []
     }'
 
     JSON.parse(json.to_s)
